@@ -1,6 +1,14 @@
 
 POETRY := $(shell command -v poetry 2> /dev/null)
+REQUIRED_POETRY_VERSION := 1.1.15
 INSTALL_STAMP := .install.stamp
+TEST_SELECTOR := test
+TEST_PYTHON_VERSION := all
+TEST_FLAVOR := all
+
+ifneq ($(shell $(POETRY) --version | awk '{print $$3}'), $(REQUIRED_POETRY_VERSION))
+$(error "Please use Poetry version $(REQUIRED_POETRY_VERSION). Simply run: poetry self update $(REQUIRED_POETRY_VERSION)")
+endif
 
 install: $(INSTALL_STAMP)
 
@@ -22,13 +30,15 @@ lint: $(INSTALL_STAMP)
 .PHONY: check
 check: $(INSTALL_STAMP) lint
 
-.PHONY: integrationTest
-integrationTest: $(INSTALL_STAMP)
-	$(POETRY) run pytest test -m "integration" -n 4 .
-
 .PHONY: build
 build:
 	docker compose build ${TARGET}
+
+.PHONY: integration-test
+integration-test: $(INSTALL_STAMP) build
+	$(POETRY) run pytest $(TEST_SELECTOR) \
+		--python-version $(TEST_PYTHON_VERSION) --flavor $(TEST_FLAVOR) \
+		-m "integration" -n 4
 
 .PHONY: push
 push: build

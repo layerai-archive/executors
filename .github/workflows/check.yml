@@ -1,0 +1,71 @@
+name: Check
+on:
+  push:
+    branches-ignore: ["main"]
+
+jobs:
+  check-lockfile:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get changes to poetry config
+        id: changed-files
+        uses: tj-actions/changed-files@v19.1
+        with:
+          base_sha: ${{ github.event.pull_request.base.sha }}
+          files: "pyproject.toml,poetry.lock"
+          files_separator: ","
+      - uses: actions/setup-python@v2
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          python-version: 3.8
+      - name: Setup poetry
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.1.15
+      - name: Cache poetry virtualenvs
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.cache/pypoetry/virtualenvs
+          key: poetry-venvs-${{ runner.os }}-3.8-slim-${{ hashFiles('poetry.lock') }}
+          restore-keys: poetry-venvs-${{ runner.os }}-3.8-
+      - name: Check lockfile
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          make install
+          poetry lock --no-update
+          [ -z "$(git status --porcelain=v1 2>/dev/null)" ] || (echo "Lock file is not up to date, please run 'poetry lock --no-update'" && exit 1)
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8]
+        flavor: ["slim", "gpu"]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch origin ${{ github.event.pull_request.base.sha }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.1.15
+      - name: Cache poetry virtualenvs
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.cache/pypoetry/virtualenvs
+          key: poetry-venvs-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.flavor }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: poetry-venvs-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.flavor }}-${{ matrix.adapter }}-
+      - name: Run integration tests
+        run: |
+          make integration-test \
+            TARGET=python${{ matrix.python-version }}-${{ matrix.flavor }} \
+            TEST_PYTHON_VERSION=${{ matrix.python-version }} \
+            TEST_FLAVOR=${{ matrix.flavor }}

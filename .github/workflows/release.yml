@@ -1,0 +1,47 @@
+name: Release
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  push:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8]
+        flavor: ["slim", "gpu"]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch origin ${{ github.event.pull_request.base.sha }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.1.15
+      - name: Cache poetry virtualenvs
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/.cache/pypoetry/virtualenvs
+          key: poetry-venvs-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.flavor }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: poetry-venvs-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.flavor }}-${{ matrix.adapter }}-
+      - name: Run integration tests
+        run: |
+          make integration-test \
+            TARGET=python${{ matrix.python-version }}-${{ matrix.flavor }} \
+            TEST_PYTHON_VERSION=${{ matrix.python-version }} \
+            TEST_FLAVOR=${{ matrix.flavor }}
+      - name: Push to DockerHub
+        run: |
+          make push TARGET=python${{ matrix.python-version }}-${{ matrix.flavor }}
