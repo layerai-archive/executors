@@ -1,0 +1,28 @@
+services:
+  python3.7:
+    image: layerai/executor-python3.7
+    build:
+      context: ./
+      args:
+        - PYTHON_VERSION=3.7.13
+        - PIP_VERSION=22.2.2
+
+  python3.8:
+    image: layerai/executor-python3.8
+    build:
+      context: ./
+      args:
+        - PYTHON_VERSION=3.8.13
+        - PIP_VERSION=22.2.2
+
+  python3.7-gpu:
+    image: layerai/executor-python3.7-gpu
+    build:
+      context: ./
+      dockerfile: python3.7-gpu/Dockerfile
+
+  python3.8-gpu:
+    image: layerai/executor-python3.8-gpu
+    build:
+      context: ./
+      dockerfile: python3.8-gpu/Dockerfile

@@ -1,0 +1,14 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# MacOS
+.DS_Store
+
+# vscode
+.vscode/
+
+# make outputs
+.install.stamp
+.environment.M1.yml
