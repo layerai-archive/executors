@@ -22,13 +22,15 @@ RUN ${INSTALLER} create -qp ${RUNTIME_DIR} && \
     -c conda-forge -c anaconda -y
 
 COPY ./requirements.txt /python-requirements/
+COPY ./vendor-requirements.txt /python-requirements/
 RUN ${RUNTIME_DIR}/bin/python3 -m pip install -q \
     --disable-pip-version-check \
     --no-warn-script-location \
     --root-user-action=ignore \
     --progress-bar off \
     --no-cache \
-    --requirement /python-requirements/requirements.txt
+    --requirement /python-requirements/requirements.txt \
+    --requirement /python-requirements/vendor-requirements.txt
 
 
 FROM gcr.io/distroless/base-debian11@sha256:e672eb713e56feb13e349773973b81b1b9284f70b15cf18d1a09ad31a03abe59
