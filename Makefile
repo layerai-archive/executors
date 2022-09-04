@@ -1,5 +1,6 @@
 
 POETRY := $(shell command -v poetry 2> /dev/null)
+TAG_SUFFIX := "-v.$(shell git rev-parse --short HEAD)"
 INSTALL_STAMP := .install.stamp
 
 install: $(INSTALL_STAMP)
@@ -23,13 +24,14 @@ lint: $(INSTALL_STAMP)
 check: $(INSTALL_STAMP) lint
 
 .PHONY: integrationTest
-integrationTest: $(INSTALL_STAMP)
-	$(POETRY) run pytest test -m "integration" -n 4 .
+integration-test: $(INSTALL_STAMP) build
+	$(POETRY) run pytest -n 8 -vv -m "integration" test --tag-suffix=$(TAG_SUFFIX)
 
 .PHONY: build
 build:
-	docker compose build ${TARGET}
+	TAG_SUFFIX=$(TAG_SUFFIX) docker compose build ${TARGET}
 
 .PHONY: push
 push: build
-	docker compose push ${TARGET}
+	TAG_SUFFIX=${TAG_SUFFIX} docker compose push ${TARGET}
+	TAG_SUFFIX=${PUSH_OVERWRITE_SUFFIX} docker compose push ${TARGET}

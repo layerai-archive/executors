@@ -9,12 +9,13 @@ RUN rm /etc/apt/sources.list.d/cuda.list \
     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub \
     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub
 
-COPY ml-requirements.txt ./ml-requirements.txt
-RUN pip install --no-cache-dir -r /ml-requirements.txt -f https://download.pytorch.org/whl/torch_stable.html \
-    && rm -f ./ml-requirements.txt
+COPY ./python-requirements/ /python-requirements/
+RUN pip install --no-cache-dir \
+    -r /python-requirements/vendor-requirements.txt \
+    -r /python-requirements/vendor-requirements-gpu.txt \
+    -r /python-requirements/requirements.txt \
+    -f https://download.pytorch.org/whl/torch_stable.html \
+  && rm -rf /python-requirements/
 
-COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r /requirements.txt \
-    && rm -f ./requirements.txt
-
-ENTRYPOINT ["python", "-m", "layer.executables.runtime"]
+COPY ./entrypoint.py /entrypoint.py
+ENTRYPOINT ["python", "/entrypoint.py"]
