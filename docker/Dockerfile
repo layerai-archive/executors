@@ -21,13 +21,15 @@ RUN ${INSTALLER} create -qp ${RUNTIME_DIR} && \
     libstdcxx-ng=12.1.0 \
     -c conda-forge -c anaconda -y
 
-COPY ./requirements.txt /python-requirements/
-RUN ${RUNTIME_DIR}/bin/python3 -m pip install -q \
+COPY ./python-requirements/ /python-requirements/
+RUN ${RUNTIME_DIR}/bin/python3 -m pip install \
     --disable-pip-version-check \
     --no-warn-script-location \
     --root-user-action=ignore \
     --progress-bar off \
     --no-cache \
+    --requirement /python-requirements/vendor-requirements.txt \
+    --requirement /python-requirements/vendor-requirements-cpu.txt \
     --requirement /python-requirements/requirements.txt
 
 
@@ -36,7 +38,11 @@ FROM gcr.io/distroless/base-debian11@sha256:e672eb713e56feb13e349773973b81b1b928
 ARG RUNTIME_DIR=/opt/runtime
 
 COPY --from=builder ${RUNTIME_DIR} /opt/python
+COPY ./entrypoint.py /entrypoint.py
 
 USER nonroot
 
-ENTRYPOINT ["/opt/python/bin/python3", "-m", "layer.executables.runtime"]
+ENV LD_LIBRARY_PATH=/opt/python/lib
+
+ENTRYPOINT ["/opt/python/bin/python3", "/entrypoint.py"]
+

@@ -1,0 +1,39 @@
+name: Build
+on:
+  push
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.2.0
+      - name: Run checks
+        run: make check
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - uses: jlumbroso/free-disk-space@main
+        with:
+          large-packages: false # Gives extra 6gb, but very slow
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: 1.2.0
+      - name: Integration test
+        run: make integration-test
+      - name: Push
+        if: github.ref_name == 'main'
+        run: make push

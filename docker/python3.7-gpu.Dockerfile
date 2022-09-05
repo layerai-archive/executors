@@ -20,12 +20,12 @@ RUN apt-get install -y --no-install-recommends python3.7 python3.7-distutils \
     && curl https://bootstrap.pypa.io/get-pip.py | python3.7 \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
 
-COPY ml-requirements.txt ./ml-requirements.txt
-RUN pip install --no-cache-dir -r /ml-requirements.txt -f https://download.pytorch.org/whl/torch_stable.html \
-    && rm -f ./ml-requirements.txt
-
-COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r /requirements.txt \
-    && rm -f ./requirements.txt
+COPY ./python-requirements/ /python-requirements/
+RUN pip install --no-cache-dir \
+    -r /python-requirements/vendor-requirements.txt \
+    -r /python-requirements/vendor-requirements-gpu.txt \
+    -r /python-requirements/requirements.txt \
+    -f https://download.pytorch.org/whl/torch_stable.html \
+  && rm -rf /python-requirements/
 
 ENTRYPOINT ["python", "-m", "layer.executables.runtime"]
