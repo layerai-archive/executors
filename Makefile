@@ -34,4 +34,5 @@ build:
 .PHONY: push
 push: build
 	TAG_SUFFIX=${TAG_SUFFIX} docker compose push ${TARGET}
+	TAG_SUFFIX=${PUSH_OVERWRITE_SUFFIX} docker compose build ${TARGET}
 	TAG_SUFFIX=${PUSH_OVERWRITE_SUFFIX} docker compose push ${TARGET}

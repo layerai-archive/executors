@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
+      BUILDKIT_INLINE_CACHE: 1
     steps:
       - uses: jlumbroso/free-disk-space@main
         with:
@@ -34,6 +35,20 @@ jobs:
           poetry-version: 1.2.0
       - name: Integration test
         run: make integration-test
+      - name: Configure AWS Credentials
+        if: github.ref_name == 'main'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        if: github.ref_name == 'main'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: public
       - name: Push
         if: github.ref_name == 'main'
-        run: make push
+        run: REPO=public.ecr.aws/t4m4i2i6/executor make push
+
