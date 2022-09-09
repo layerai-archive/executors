@@ -1,0 +1,22 @@
+{
+  extends: ["config:base"],
+  schedule: ["after 9pm on sunday"],
+  labels: ["dependencies"],
+  packageRules: [
+    {
+      matchPackagePatterns: ["*"],
+      excludePackageNames: ["layer"],
+      enabled: false,
+    },
+    {
+      matchPackagePatterns: ["layer"],
+      automerge: true,
+    },
+  ],
+  vulnerabilityAlerts: {
+    enabled: "true",
+  },
+  pip_requirements: {
+    fileMatch: ["python-requirements\/.*"]
+  }
+}
