@@ -61,17 +61,17 @@ def test_layer_import(tag, get_full_image_name):
     zip(
         EXECUTOR_TAGS,
         [
-            b"Python 3.7.13\n",
-            b"Python 3.8.13\n",
-            b"Python 3.7.13\n",
-            b"Python 3.8.10\n",
+            b"3.7\n",
+            b"3.8\n",
+            b"3.7\n",
+            b"3.8\n",
         ],
     ),
 )
 def test_python_version(tag, output, get_full_image_name):
     with _run_container(
         image=get_full_image_name(tag),
-        command="--version",
+        command="-c 'import sys; print(f\"{sys.version_info[0]}.{sys.version_info[1]}\")'",
         entrypoint=_get_python_path_from_tag(tag),
     ) as container:
         assert _wait_for_container(container) == {"Error": None, "StatusCode": 0}
