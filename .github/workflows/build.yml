@@ -50,5 +50,5 @@ jobs:
           registry-type: public
       - name: Push
         if: github.ref_name == 'main'
-        run: REPO=public.ecr.aws/t4m4i2i6/executor make push
+        run: make push
 
