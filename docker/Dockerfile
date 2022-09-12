@@ -4,7 +4,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --yes \
     ca-certificates=20210119 \
     bzip2=1.0.8-4 \
-    curl=7.74.0-1.3+deb11u2
+    curl
 
 ENV INSTALLER bin/micromamba
 # hadolint ignore=DL4006

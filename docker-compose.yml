@@ -2,39 +2,39 @@ version: "3.9"
 
 services:
   python3.7:
-    image: ${REPO}:python3.7${TAG_SUFFIX:-}
+    image: public.ecr.aws/layerai/executor:python3.7${TAG_SUFFIX:-}
     build:
       context: ./
       dockerfile: docker/Dockerfile
       cache_from:
-        - ${REPO}:python3.7
+        - public.ecr.aws/layerai/executor:python3.7
       args:
         - PYTHON_VERSION=3.7.13
         - PIP_VERSION=22.2.2
 
   python3.8:
-    image: ${REPO}:python3.8${TAG_SUFFIX:-}
+    image: public.ecr.aws/layerai/executor:python3.8${TAG_SUFFIX:-}
     build:
       context: ./
       dockerfile: docker/Dockerfile
       cache_from:
-        - ${REPO}:python3.8
+        - public.ecr.aws/layerai/executor:python3.8
       args:
         - PYTHON_VERSION=3.8.13
         - PIP_VERSION=22.2.2
 
   python3.7-gpu:
-    image: ${REPO}:python3.7-gpu${TAG_SUFFIX:-}
+    image: public.ecr.aws/layerai/executor:python3.7-gpu${TAG_SUFFIX:-}
     build:
       context: ./
       dockerfile: docker/python3.7-gpu.Dockerfile
       cache_from:
-        - ${REPO}:python3.7-gpu
+        - public.ecr.aws/layerai/executor:python3.7-gpu
 
   python3.8-gpu:
-    image: ${REPO}:python3.8-gpu${TAG_SUFFIX:-}
+    image: public.ecr.aws/layerai/executor:python3.8-gpu${TAG_SUFFIX:-}
     build:
       context: ./
       dockerfile: docker/python3.8-gpu.Dockerfile
       cache_from:
-        - ${REPO}:python3.8-gpu
+        - public.ecr.aws/layerai/executor:python3.8-gpu
